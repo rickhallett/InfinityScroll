@@ -47,15 +47,45 @@ class Model {
     setCount(n) {
         this.count = n;
     }
+
+    allLoaded() {
+        return this.photoStore.every(photo => photo.rendered);
+    }
 }
 
 class View {
     constructor({ model } = {}) {
         this.model = model;
+        this.controller = null;
         this.dom = {
             loader: $('loader'),
             imageContainer: $('image-container'),
         };
+        this.furthestScrollY = 0;
+
+        this.initScrollListener();
+    }
+
+    linkController(controller) {
+        this.controller = controller;
+    }
+
+    initScrollListener() {
+        window.addEventListener('scroll', () => {
+            if (this.isAtEnd() && this.isFurthest()) {
+                this.furthestScrollY = window.scrollY;
+                console.log('loading more...');
+                this.controller.getPhotos(this.model.randomApi);
+            }
+        });
+    }
+
+    isFurthest() {
+        return Boolean(window.scrollY > this.furthestScrollY);
+    }
+
+    isAtEnd() {
+        return Boolean(window.innerHeight + window.scrollY >= document.body.offsetHeight - 1000);
     }
 
     showLoader() {
@@ -67,11 +97,13 @@ class View {
     }
 
     renderNewImages() {
-
+        this.dom.imageContainer.innerHTML += this.model.photoStore.map(photo => this.constructImageHtmlString(photo)).join('');
     }
 
-    constructImageHtmlString() {
-        
+    constructImageHtmlString(photo) {
+        if (photo.rendered) return '';
+        photo.rendered = true;
+        return `<img src="${photo.urls.regular}" alt="${photo.description}"></img>`;
     }
 }
 
@@ -81,9 +113,23 @@ class Controller {
         this.view = view;
     }
 
-    async getPhotos() {
+    async getPhotos(apiUrl) {
+        if (!model.allLoaded) return;
+
+        const res = await this.initGetRequest(apiUrl);
+        if (res.errors) {
+            return this.log(res.errors);
+        }
+
+        this.model.photoStore = [...this.model.photoStore, ...res.map(photo => new Photo(photo))];
+        console.log(this.model.photoStore);
+
+        this.view.renderNewImages();
+    }
+
+    async initGetRequest(apiUrl) {
         try {
-            const res = await fetch(this.model.randomApi);
+            const res = await fetch(apiUrl);
             return res.json();
         } catch (err) {
             return Promise.reject(err);
@@ -94,6 +140,7 @@ class Controller {
 class Photo {
     constructor(photo) {
         this.id = photo.id;
+        this.rendered = false;
         this.likes = photo.likes;
         this.description = photo.description;
         this.location = {
@@ -135,16 +182,12 @@ class App {
         this.view = view;
         this.controller = controller;
         this.log = log;
+
+        this.init();
     }
 
-    async getPhotos() {
-        const res = await this.controller.getPhotos();
-        if (res.errors) {
-            return this.log(res.errors);
-        }
+    init() {
 
-        this.model.photoStore = [...this.model.photoStore, ...res.map(photo => new Photo(photo))];
-        console.log(this.model.photoStore);
     }
 }
 
@@ -154,11 +197,13 @@ const model = new Model();
 const view = new View({ model });
 const controller = new Controller({ model, view });
 
+view.linkController(controller);
+
 const app = new App({ model, view, controller, log });
 
 console.log(app);
 
-app.getPhotos();
+app.controller.getPhotos(model.randomApi);
 
 const ex = {
     "id": "Dwu85P9SOIk",

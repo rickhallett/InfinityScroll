@@ -9,10 +9,20 @@ body {
     background-color: whitesmoke;
 }
 
-h1 {
-    text-align: center;
+.fading-overlay {
+    margin: 0 30%;
+    background: linear-gradient(to right, rgba(0,130,170,0),rgba(0,130,170,0.05));
+    border-radius: 50%;
     margin-top: 2.5rem;
     margin-bottom: 2.5rem;
+    height: 50px;
+}
+
+h1 {
+    text-align: center; 
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
     font-size: 3rem;
     letter-spacing: 1rem;
 }
@@ -44,11 +54,15 @@ h1 {
 }
 
 @media screen and (max-width: 600px) {
+    .fading-overlay {
+        margin: 0 5%;
+    }
+
     h1 {
         font-size: 1.8rem;
         letter-spacing: 0.75rem;
     }
-    
+
     .image-container {
         margin: 10px;
     }
