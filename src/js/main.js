@@ -10,6 +10,8 @@ const utils = {
         return (msg, color = null) => {
             if (!debug) return void 0;
 
+            //TODO: make return fn recursive if typeof(msg) == Array
+
             if (msg instanceof Error) {
                 console.error(`${new Date().toISOString()}-LOG-#${++n} => ${msg}`);
                 return false;
@@ -48,9 +50,11 @@ class Model {
 }
 
 class View {
-    constructor({  } = {}) {
+    constructor({ model } = {}) {
+        this.model = model;
         this.dom = {
             loader: $('loader'),
+            imageContainer: $('image-container'),
         };
     }
 
@@ -62,19 +66,24 @@ class View {
         this.dom.loader.hidden = true;
     }
 
-    renderImage() {
+    renderNewImages() {
 
+    }
+
+    constructImageHtmlString() {
+        
     }
 }
 
 class Controller {
-    constructor({  } = {}) {
-        
+    constructor({ model, view } = {}) {
+        this.model = model;
+        this.view = view;
     }
 
-    async getPhotos(model) {
+    async getPhotos() {
         try {
-            const res = await fetch(model.randomApi);
+            const res = await fetch(this.model.randomApi);
             return res.json();
         } catch (err) {
             return Promise.reject(err);
@@ -129,24 +138,23 @@ class App {
     }
 
     async getPhotos() {
-        const res = await this.controller.getPhotos(this.model);
-        if (res instanceof Error) {
-            return this.log(res);
+        const res = await this.controller.getPhotos();
+        if (res.errors) {
+            return this.log(res.errors);
         }
 
-        this.model.photoStore = res.map(photo => new Photo(photo));
+        this.model.photoStore = [...this.model.photoStore, ...res.map(photo => new Photo(photo))];
         console.log(this.model.photoStore);
     }
 }
 
 const log = utils.createLog();
 
-const app = new App({
-    model: new Model(),
-    view: new View(),
-    controller: new Controller(),
-    log: log
-});
+const model = new Model();
+const view = new View({ model });
+const controller = new Controller({ model, view });
+
+const app = new App({ model, view, controller, log });
 
 console.log(app);
 
