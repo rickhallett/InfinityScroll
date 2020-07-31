@@ -1,3 +1,5 @@
+const $ = (element) => document.getElementById(element);
+
 class Model {
     constructor({  } = {}) {
         this.accessKey = 'kBhKp8DtvAU5rOFphaQOr_lVxKZkBzBUYSdGzI0yQ14',
@@ -8,7 +10,17 @@ class Model {
 
 class View {
     constructor({  } = {}) {
-        
+        this.dom = {
+            loader: $('loader'),
+        };
+    }
+
+    showLoader() {
+        this.dom.loader.hidden = false;
+    }
+
+    hideLoader() {
+        this.dom.loader.hidden = true;
     }
 }
 

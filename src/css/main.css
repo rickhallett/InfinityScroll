@@ -5,3 +5,52 @@
     font-size: 10px;
 }
 
+body {
+    background-color: whitesmoke;
+}
+
+h1 {
+    text-align: center;
+    margin-top: 2.5rem;
+    margin-bottom: 2.5rem;
+    font-size: 3rem;
+    letter-spacing: 1rem;
+}
+
+.loader {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.loader img {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0.8;
+}
+
+.image-container {
+    margin: 10px 30%;
+}
+
+.image-container img {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+@media screen and (max-width: 600px) {
+    h1 {
+        font-size: 1.8rem;
+        letter-spacing: 0.75rem;
+    }
+    
+    .image-container {
+        margin: 10px;
+    }
+}
+
